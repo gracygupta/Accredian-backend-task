@@ -1,0 +1,61 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Define Course model
+model Course {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  enrolledReferrerBonus Float
+  enrolledRefereeBonus  Float
+  refereeBonus          Float
+  referrerBonus         Float
+  price                 Float
+  category              String
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  referrals             Referral[]
+}
+
+// Define Referral model
+model Referral {
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String
+  phoneNumber    String?
+  referredBy     Int       // User ID who referred
+
+  // Course the referral is related to
+  referredCourse Course?   @relation(fields: [referredCourseId], references: [id])
+
+  referredCourseId Int?    // This is the foreign key in the database schema
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  referrer       User      @relation("Referrer", fields: [referredBy], references: [id])
+}
+
+// Define User model (if needed for referrers)
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  // Add more fields as needed
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Add relation to Referral model
+  referredBy  Referral[] @relation("Referrer")
+}
