@@ -2,9 +2,10 @@ const jwt = require("jsonwebtoken");
 const Res = require("../service/general.helper");
 const http = require("../config/http.config");
 const userService = require("../service/userService");
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware for authentication
-async function authtoken(req, res, next) {
+async function auth(req, res, next) {
   const token = req.header("auth-token");
 
   if (!token) {
@@ -12,15 +13,14 @@ async function authtoken(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    const user = await userService.findUserById(decoded.user.id);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await userService.findUserById(decoded.userId);
 
     if (!user) {
       return Res(res, http.not_found_code, "User not found");
     }
 
     req.user = user;
-    console.log(req.user);
     next();
   } catch (error) {
     console.error(`Error at auth.middleware authenticateToken ${error}`);
@@ -28,4 +28,4 @@ async function authtoken(req, res, next) {
   }
 }
 
-module.exports = authtoken;
+module.exports = { auth };

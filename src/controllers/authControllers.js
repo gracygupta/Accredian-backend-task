@@ -1,18 +1,26 @@
-const express = require("express");
-const router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { PrismaClient } = require("@prisma/client");
+const Res = require("../service/general.helper");
+const http = require("../config/http.config");
 
 const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Create User API
-router.post("/", async (req, res) => {
+const signup = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return Res(res, http.bad_request, "User already exists");
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -29,15 +37,18 @@ router.post("/", async (req, res) => {
       expiresIn: "1h", // Token expires in 1 hour
     });
 
-    res.status(201).json({ id: user.id, email: user.email, token });
+    return Res(res, http.created_code, "User Created", {
+      id: user.id,
+      email: user.email,
+      token,
+    });
   } catch (error) {
     console.error("Error creating user:", error);
-    res.status(500).json({ error: "Internal server error" });
+    return Res(res, http.internal_server_error, "Internal server error");
   }
-});
+};
 
-// Login User API
-router.post("/login", async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -45,14 +56,14 @@ router.post("/login", async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return Res(res, http.not_found_error, "Invalid Credentials");
     }
 
     // Compare hashed password
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({ error: "Invalid password" });
+      return Res(res, http.unauthorized_code, "Invalid Credentials");
     }
 
     // Generate JWT token
@@ -62,9 +73,9 @@ router.post("/login", async (req, res) => {
 
     res.json({ token });
   } catch (error) {
-    console.error("Error logging in user:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error creating user:", error);
+    return Res(res, http.internal_server_error, "Internal server error");
   }
-});
+};
 
-module.exports = router;
+module.exports = { login, signup };

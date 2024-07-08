@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-router.use("/course", require("./courses"));
+router.use("/courses", require("./courses"));
 
-router.use("/referral", require("./referrals"));
+router.use("/referrals", require("./referrals"));
 
-router.use("/user", require("./user"));
+router.use("/auth", require("./auth"));
 
 module.exports = router;

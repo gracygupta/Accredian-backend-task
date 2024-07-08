@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const rateLimit = require("express-rate-limit");
+const cors = require("cors");
 const logger = require("morgan");
 // require("./config/db.config").dbConnect();
 require("dotenv").config();
@@ -15,7 +16,7 @@ app.use(limiter);
 
 // Enable CORS for all routes
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST",
@@ -23,9 +24,21 @@ app.use((req, res, next) => {
     "PUT",
     "DELETE"
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, auth-token"
+  );
   next();
 });
+
+// Enable CORS for all routes
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: "GET,POST,PATCH,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization,auth-token",
+  })
+);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
