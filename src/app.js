@@ -15,23 +15,6 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Enable CORS for all routes
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST",
-    "PATCH",
-    "PUT",
-    "DELETE"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, auth-token"
-  );
-  next();
-});
-
-// Enable CORS for all routes
 app.use(
   cors({
     origin: "https://accredian-refer-n-earn.vercel.app",

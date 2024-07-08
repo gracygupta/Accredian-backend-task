@@ -8,9 +8,12 @@ const give_referral = async (req, res) => {
   const { name, email, phoneNumber, referredCourseId } = req.body;
 
   try {
+    if (email == req.user.email) {
+      return Res(res, http.forbidden_code, "Self referrals are not allowed");
+    }
     // Fetch the referred course details
     const course = await prisma.course.findUnique({
-      where: { id: referredCourseId },
+      where: { id: parseInt(referredCourseId) },
     });
 
     if (!course) {
@@ -21,7 +24,7 @@ const give_referral = async (req, res) => {
     const existingReferral = await prisma.referral.findFirst({
       where: {
         email,
-        referredCourseId,
+        referredCourseId: parseInt(referredCourseId),
       },
     });
 
@@ -39,7 +42,7 @@ const give_referral = async (req, res) => {
         email,
         phoneNumber,
         referredBy: req.user.id,
-        referredCourseId,
+        referredCourseId: parseInt(referredCourseId),
       },
     });
 
