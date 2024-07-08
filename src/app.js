@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 // Enable CORS for all routes
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://accredian-refer-n-earn.vercel.app",
     methods: "GET,POST,PATCH,PUT,DELETE",
     allowedHeaders: "Content-Type,Authorization,auth-token",
   })
